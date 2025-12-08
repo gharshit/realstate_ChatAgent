@@ -77,6 +77,9 @@ Comprehensive test suite covering API endpoints, agent components, tools, and un
 
 ### 3. LangGraph Agent (React-Style)
 
+![ReAct Agent](https://github.com/gharshit/realstate_ChatAgent/blob/main/property_sales_agent_graph.png)
+
+
 **Location:** `app/chatagent/`
 
 **Purpose:** Conversational AI agent that processes user queries, decides actions, and generates responses.
@@ -246,5 +249,6 @@ proplens/
 
 - `app/README.md` - Detailed application service documentation
 - `db_service/README.md` - Database service documentation
+
 
 
