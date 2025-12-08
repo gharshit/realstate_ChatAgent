@@ -38,14 +38,22 @@ async def lifespan(app: FastAPI)->AsyncGenerator:
     # Connection pool for langchain checkpoint
     # Create pool without context manager to keep it alive for entire lifespan
     connection_kwargs = {
-        "autocommit": True,
+        "autocommit"       : True,
         "prepare_threshold": 0,
-        "row_factory": dict_row
+        "row_factory"      : dict_row
     }
+    async def check_conn(conn):
+        await conn.execute("SELECT 1")
     checkpoint_pool = AsyncConnectionPool(
         clean_conn_string_for_psycopg(settings.database_url),
-        kwargs=connection_kwargs,
-        open=False  # Don't open in constructor (recommended)
+        kwargs            = connection_kwargs,
+        min_size          = 2,
+        max_size          = 5,
+        max_idle          = 60,                  # ✅ close before provider kills it
+        max_lifetime      = 30 * 60,             # ✅ recycle every 30 min
+        reconnect_timeout = 60,
+        check             = check_conn,          # ✅ validate before use
+        open              = False                # Don't open in constructor (recommended)
     )
     
     # Explicitly open the pool
@@ -79,10 +87,10 @@ async def lifespan(app: FastAPI)->AsyncGenerator:
 
 ##> Initialize FastAPI app
 app = FastAPI(
-    title="Proplens API",
-    description="Property management API with conversational agent",
-    version="1.0.0",
-    lifespan=lifespan
+    title       = "ChatAgent API",
+    description = "Property management API with conversational agent",
+    version     = "1.0.0",
+    lifespan    = lifespan
 )
 
 
@@ -97,7 +105,7 @@ async def root():
     """
     Root endpoint for the API.
     """
-    return {"message": "Proplens API is running..."}
+    return {"message": "ChatAgent API is running..."}
 
 
 
