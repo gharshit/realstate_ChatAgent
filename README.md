@@ -171,8 +171,10 @@ DATABASE_URL=postgresql://user:password@host:port/database
 ADMIN_KEY=your-secret-admin-key
 JWT_SECRET_KEY=your-secret-jwt-key
 OPENAI_API_KEY=your-openai-api-key
+OPENAI_MODEL=gpt-4o
 MAX_ITERATIONS=5
 JWT_TOKEN_EXPIRY_HOURS=1
+RECREATE_DB=FALSE // TO CREATE FRESH DB
 ```
 
 3. **Setup Database**
@@ -240,3 +242,4 @@ proplens/
 
 - `app/README.md` - Detailed application service documentation
 - `db_service/README.md` - Database service documentation
+
