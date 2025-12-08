@@ -18,6 +18,10 @@
 
 Proplens is a property management API with an intelligent conversational agent that helps users find properties, answer questions about real estate projects, and book property visits. The system uses a LangGraph-based agent that can interact with the database, search for information, and perform actions based on user requests.
 
+## Overall Arch
+![Architecture](https://github.com/gharshit/realstate_ChatAgent/blob/main/summary.png)
+
+
 ## Modules
 
 ### app/
@@ -242,4 +246,5 @@ proplens/
 
 - `app/README.md` - Detailed application service documentation
 - `db_service/README.md` - Database service documentation
+
 
