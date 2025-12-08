@@ -281,5 +281,7 @@ proplens/
 
 ## Next Steps
 
+- Solve minor bugs. Ex: to have llm use correct lead_id.
 - Implement Logging for better error handling and debugging.
+
 
