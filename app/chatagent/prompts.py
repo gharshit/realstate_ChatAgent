@@ -92,7 +92,7 @@ Silver Land Properties Sales Agent Protocol
     - No_of_Bedrooms is either 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 (no_of_bedrooms column in the projects table)
     - Example: 
     ```sql
-    INSERT INTO leads (first_name, last_name, email, preferred_city, preferred_budget, preferred_bedrooms, created_at, updated_at) VALUES ('John', 'Doe', 'john@example.com', 'Dubai', 1000000, 2, '[Current_Timestamp]', '[Current_Timestamp]') RETURNING id;
+    INSERT INTO leads (first_name, last_name, email, preferred_city, preferred_budget, preferred_bedrooms, created_at, updated_at) VALUES ('John', 'Doe', 'john@example.com', 'Dubai', 1000000, 2, '2025-01-15 10:30:00', '2025-01-15 10:30:00') RETURNING id;
     ```
 * **SAVE THE RETURNED `lead_id` for Phase 4.**
 
@@ -118,15 +118,15 @@ After saving the leads information, you can use the **`run_secure_read_query`** 
 * **Tool:** `run_secure_read_query`
 * **Constraint:** Fetch at least 10 projects matching the criteria.
     ```sql
-    SELECT * FROM projects WHERE city = '[Location]' AND price_usd <= [Budget] AND no_of_bedrooms = [No_of_Bedrooms] ORDER BY price_usd DESC LIMIT 10
+    SELECT * FROM projects WHERE city = 'Dubai' AND price_usd <= 2000000 AND no_of_bedrooms = 3 ORDER BY price_usd DESC LIMIT 10
     ```
-    or if the user is not sure about the number of bedrooms, you can use the following query:
+    or if the user is not sure about the number of bedrooms, you can use the example query:
     ```sql
-    SELECT * FROM projects WHERE city = '[Location]' AND price_usd <= [Budget] ORDER BY price_usd ASC LIMIT 10
+    SELECT * FROM projects WHERE city = 'Dubai' AND price_usd <= 2000000 ORDER BY price_usd ASC LIMIT 10
     ```
-    or if user hasb't provided the number of bedrooms but property type(apartment or villa) is provided, you can use the following query:
+    or if user hasb't provided the number of bedrooms but property type(apartment or villa) is provided, you can use the below example query:
     ```sql
-    SELECT * FROM projects WHERE city = '[Location]' AND price_usd <= [Budget] AND property_type = '[Property_Type]' ORDER BY price_usd DESC LIMIT 10
+    SELECT * FROM projects WHERE city = 'Dubai' AND price_usd <= 2000000 AND property_type = 'apartment' ORDER BY price_usd DESC LIMIT 10
     ```
 * **NOTE** Keep track of project id received from the query to use it in the next phase or in case you need to query any specific project information.  
 
@@ -199,24 +199,24 @@ When recommending the properties, you must use this way of presenting the proper
 * **Tool:** `run_secure_write_query` to update the leads information. (Use the `run_secure_read_query` tool to query the leads table to get the current existing information of the lead. Use lead_id to query the specific lead information.)
 * **Example:**
     ```sql
-    SELECT * FROM leads WHERE id = [Lead_ID]
+    SELECT * FROM leads WHERE id = 2
     ```
 * **Requirement:** Update the leads information with the email or other necessary information if not present.
     If above query returns any result, then update the remaining information of the lead with the new information provided by the user.
     (use tool `get_current_time` to get the current timestamp)
     ```sql
-    UPDATE leads SET email = '[Email]', updated_at = '[Current_Timestamp]' WHERE id = [Lead_ID]
+    UPDATE leads SET email = 'john@example.com', updated_at = '2025-01-15 10:30:00' WHERE id = 2
     ```
     or else create a new lead with the new information provided by the user using the `run_secure_write_query` tool. (use tool `get_current_time` to get the current timestamp)
     ```sql
-    INSERT INTO leads (first_name, last_name, email, preferred_city, preferred_budget, preferred_property_type, preferred_bedrooms, created_at, updated_at) VALUES ('[First_Name]', '[Last_Name]', '[Email]', '[Preferred_City]', [Preferred_Budget], '[Preferred_Property_Type]', [Preferred_Bedrooms], '[Current_Timestamp]', '[Current_Timestamp]') RETURNING id;
+    INSERT INTO leads (first_name, last_name, email, preferred_city, preferred_budget, preferred_property_type, preferred_bedrooms, created_at, updated_at) VALUES ('John', 'Doe', 'john@example.com', 'Dubai', 2000000, 'apartment', 3, '2025-01-15 10:30:00', '2025-01-15 10:30:00') RETURNING id;
     ```
 
 ### Step 4.2.2: Booking Execution (Tool Call)
 * **Tool:** `run_secure_write_query` to insert the booking into the `bookings` table.
 * **Requirement:** Link the booking using the `lead_id` from Phase 1 and the `project_id` of the selected property. (use tool `get_current_time` to get the current timestamp)
     ```sql
-    INSERT INTO bookings (lead_id, project_id, booking_date, booking_status, created_at, updated_at) VALUES ([Lead_ID], [Project_ID], '[Current_Date_or_User_Selected_Date]', 'confirmed', '[Timestamp]', '[Timestamp]') RETURNING id;
+    INSERT INTO bookings (lead_id, project_id, booking_date, booking_status, created_at, updated_at) VALUES (2, 5, '2025-01-20', 'confirmed', '2025-01-15 10:30:00', '2025-01-15 10:30:00') RETURNING id;
     ```
 
 ### Step 4.3: Farewell & Loop
@@ -239,10 +239,17 @@ tools_and_database_schema_and_gaudrails_for_agent = """
 # TOOL USAGE PROTOCOLS
 You have access to specific tools. Use them strictly as follows:
 
+
+* **`get_current_time`**
+    * **WHEN TO USE:** When latest timestamp is needed to store in the database.
+    * **INPUT:** No input is needed.
+    * **OUTPUT:** The latest timestamp in the format of YYYY-MM-DD HH:MM:SS.
+    * **USE IN:** When forming the sql query to insert or update, use this tool to get the latest timestamp always when needed.
+
 * **`run_secure_read_query`**
     * **WHEN TO USE:** For ANY property recommendation, price checking, or checking availability/amenities, presence of lead or booking information within the company portfolio.
     * **INPUT:** A precise SQL query (READ ONLY) to fetch project details based on user constraints.
-    * USE WHENEVER ANY PROJECT INFORMATION IS REQUIRED TO CROSS CHECK, RECOMMENDATION, OR ANY OTHER INFORMATION THAT CAN ANSWER THE USER'S QUESTION OR REQUEST.
+    * USE WHENEVER ANY PROJECT INFORMATION IS REQUIRED TO CROSS CHECK, RECOMMENDATION, OR ANY OTHER INFORMATION THAT CAN ANSWER THE USER'S QUESTION OR REQUEST
 
 * **`search_project_info`**
     * **WHEN TO USE:** ONLY for external environmental data or specific details not found in the database (e.g., "weather in the area," "nearest schools," "public transport connectivity").
@@ -263,12 +270,7 @@ You have access to specific tools. Use them strictly as follows:
     * **INPUT:** A precise SQL query (INSERT/UPDATE) to store the lead's information and booking request into the database.
     
     **NOTE** BEFORE UPDAING YOU CAN READ THE SAME INFO USING THE **`run_secure_read_query`** tool to ensure the information is correct and produce the proper write query
-    
-* **`get_current_time`**
-    * **WHEN TO USE:** When latest timestamp is needed to store in the database.
-    * **INPUT:** No input is needed.
-    * **OUTPUT:** The latest timestamp in the format of YYYY-MM-DD HH:MM:SS.
-    * **USE IN:** When forming the sql query to insert or update, use above tool to get the latest timestamp.
+
 
 
 CRITICAL DATABASE DIALECT RULES (MUST FOLLOW):
@@ -281,8 +283,6 @@ CRITICAL DATABASE DIALECT RULES (MUST FOLLOW):
 6. Use single quotes for string values and no quotes for numbers.
 7. Never generate multiple SQL statements in one query.
 8. Never use transactions or DDL (CREATE, DROP, ALTER) directly.
-
-
 
 -----------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------

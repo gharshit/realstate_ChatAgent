@@ -62,3 +62,29 @@ def invalid_api_key():
 def test_jwt_secret():
     """Test JWT secret key."""
     return settings.jwt_secret_key
+
+
+@pytest.fixture(scope="module", autouse=True)
+def setup_checkpoint():
+    """
+    Automatically setup mock checkpoint in app.state for all tests.
+    This prevents AttributeError when accessing request.app.state.checkpoint.
+    """
+    from unittest.mock import MagicMock
+    
+    # Create mock checkpoint
+    mock_checkpoint = MagicMock()
+    
+    # Store original checkpoint if it exists
+    original_checkpoint = getattr(app.state, 'checkpoint', None)
+    
+    # Set mock checkpoint
+    app.state.checkpoint = mock_checkpoint
+    
+    yield mock_checkpoint
+    
+    # Restore original checkpoint or cleanup
+    if original_checkpoint is not None:
+        app.state.checkpoint = original_checkpoint
+    elif hasattr(app.state, 'checkpoint'):
+        delattr(app.state, 'checkpoint')

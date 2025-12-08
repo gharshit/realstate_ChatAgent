@@ -231,7 +231,7 @@ class SQLSecurityValidator:
 async def run_secure_read_query(
      query: str = Field(
           ..., 
-          description="SELECT or WITH query to read data from database. Allowed tables: leads, bookings, projects. History table is NOT accessible.",
+          description="SELECT or WITH query to read data from database. Allowed tables: leads, bookings, projects. History table is NOT accessible. Use actual values in the query strings as tool expects one single query string as input.",
           min_length=2
      )
 ) -> Tuple[str, List[Dict[str, Any]]]:

@@ -3,6 +3,7 @@ from fastapi import HTTPException, status, Depends
 from app.utils.db_connection import get_db, DatabaseConnection
 from app.models.api_models import ChatRequest, ChatMessage
 from app.utils.auth import verify_bearer_token
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from langchain_core.messages import HumanMessage, AIMessage
 from datetime import datetime
 
@@ -131,3 +132,63 @@ async def extract_messages_from_checkpoint_state(state: Any) -> List[ChatMessage
                # Skip SystemMessage, ToolMessage, etc.
      
      return chat_messages
+
+
+
+
+
+
+def clean_conn_string_for_psycopg(database_url: str) -> str:
+    """
+    Clean PostgreSQL connection string for psycopg3 compatibility.
+    
+    Removes unsupported query parameters that psycopg3 doesn't recognize.
+    psycopg3 uses 'sslmode' instead of 'ssl', and doesn't support some other parameters.
+    For Neon database, ensures proper SSL configuration.
+    
+    Args:
+        database_url: PostgreSQL connection URL
+        
+    Returns:
+        str: Cleaned connection string compatible with psycopg3
+    """
+    if not database_url.startswith("postgresql://"):
+        return database_url
+    
+    # Parse URL to remove unsupported query parameters
+    parsed = urlparse(database_url)
+    query_params = parse_qs(parsed.query)
+    
+    # Remove ALL SSL-related parameters that psycopg3 doesn't support
+    # psycopg3 only supports 'sslmode', not 'ssl', 'sslcert', 'sslkey', 'sslrootcert', 'channel_binding', etc.
+    # Neon URLs often have 'ssl=require&channel_binding=require' which must be removed
+    unsupported_ssl_params = ['ssl', 'sslcert', 'sslkey', 'sslrootcert', 'sslcrl', 'channel_binding']
+    removed_params = []
+    for param in unsupported_ssl_params:
+        if param in query_params:
+            removed_params.append(f"{param}={query_params[param][0]}")
+            del query_params[param]
+    
+    if removed_params:
+        print(f"Removed unsupported SSL parameters: {', '.join(removed_params)}")
+    
+    # Ensure sslmode is set for Neon database (requires SSL)
+    # Use 'require' for Neon to ensure SSL is used
+    if 'sslmode' not in query_params:
+        query_params['sslmode'] = ['require']
+    else:
+        # Get current sslmode value
+        current_sslmode = query_params.get('sslmode', [''])[0].lower()
+        # If sslmode is empty, 'disable', or 'allow', change to 'require' for Neon
+        if current_sslmode in ['', 'disable', 'allow']:
+            query_params['sslmode'] = ['require']
+        # Keep 'prefer', 'require', 'verify-ca', 'verify-full' as-is
+    
+    # Reconstruct URL with cleaned parameters
+    new_query = urlencode(query_params, doseq=True)
+    new_parsed = parsed._replace(query=new_query)
+    clean_url = urlunparse(new_parsed)
+    
+    print(f"Cleaned connection string: {clean_url}")
+    
+    return clean_url

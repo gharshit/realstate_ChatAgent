@@ -15,6 +15,7 @@ async def test_search_project_success(mocker):
 
     result = await search_project_info.ainvoke({
         "project_name": "Ocean View",
+        "location": "Dubai",
         "project_description": "Waterfront",
         "project_metadata": "Dubai"
     })
@@ -28,7 +29,7 @@ async def test_search_project_success(mocker):
     call_arg = mock_ddg_instance.run.call_args[0][0]
     assert "Ocean View" in call_arg
     assert "Waterfront" in call_arg
-    assert "Dubai" in call_arg
+    assert "Dubai" in call_arg  # Location should be included in query
 
 
 ## INFO: THIS IS TO TEST IF THE SEARCH PROJECT TOOL IS WORKING AS EXPECTED WHEN THE QUERY IS A NO RESULTS SEARCH QUERY.
@@ -40,7 +41,8 @@ async def test_search_project_no_results(mocker):
     mocker.patch("app.chatagent.tools.DuckDuckGoSearchResults", return_value=mock_ddg_instance)
 
     result = await search_project_info.ainvoke({
-        "project_name": "Nonexistent Place"
+        "project_name": "Nonexistent Place",
+        "location": "Dubai"
     })
     
     assert "Warning" in result[0]
@@ -56,7 +58,8 @@ async def test_search_project_error(mocker):
     mocker.patch("app.chatagent.tools.DuckDuckGoSearchResults", return_value=mock_ddg_instance)
 
     result = await search_project_info.ainvoke({
-        "project_name": "Error Place"
+        "project_name": "Error Place",
+        "location": "Dubai"
     })
     
     assert "Error" in result[0]

@@ -12,6 +12,7 @@ async def test_search_project_name_only():
     """Test search with project name only."""
     message, results = await search_project_info.ainvoke({
         "project_name": "Burj Khalifa",
+        "location": "Dubai",
         "project_description": "",
         "project_metadata": ""
     })
@@ -31,6 +32,7 @@ async def test_search_project_with_description():
     """Test search with project name and description."""
     message, results = await search_project_info.ainvoke({
         "project_name": "Dubai Marina",
+        "location": "Dubai",
         "project_description": "Luxury waterfront development",
         "project_metadata": ""
     })
@@ -49,6 +51,7 @@ async def test_search_project_with_full_details():
     """Test search with project name, description, and metadata."""
     message, results = await search_project_info.ainvoke({
         "project_name": "Palm Jumeirah",
+        "location": "Dubai",
         "project_description": "Iconic palm-shaped island",
         "project_metadata": "Dubai, luxury villas and apartments, Nakheel developer"
     })
@@ -67,6 +70,7 @@ async def test_search_project_empty_name():
     try:
         message, results = await search_project_info.ainvoke({
             "project_name": "",
+            "location": "Dubai",
             "project_description": "",
             "project_metadata": ""
         })
@@ -83,6 +87,7 @@ async def test_search_project_real_dubai_project():
     """Test search with a real Dubai property project name."""
     message, results = await search_project_info.ainvoke({
         "project_name": "Emaar Beachfront",
+        "location": "Dubai",
         "project_description": "Beachfront residential development",
         "project_metadata": "Dubai, Emaar Properties"
     })
@@ -100,6 +105,7 @@ async def test_search_project_unknown_project():
     """Test search with a less known or fictional project name."""
     message, results = await search_project_info.ainvoke({
         "project_name": "XYZ Fictional Tower 12345",
+        "location": "Dubai",
         "project_description": "A fictional property",
         "project_metadata": ""
     })
@@ -116,6 +122,7 @@ async def test_search_project_special_characters():
     """Test search with special characters in project name."""
     message, results = await search_project_info.ainvoke({
         "project_name": "Dubai Hills Estate",
+        "location": "Dubai",
         "project_description": "Residential community with golf course",
         "project_metadata": "Emaar, Dubai"
     })

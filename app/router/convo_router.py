@@ -18,6 +18,7 @@ from app.utils.db_connection import get_db, DatabaseConnection
 from app.utils.helpers import extract_messages_from_checkpoint_state
 from app.utils.auth import verify_bearer_token
 from app.chatagent.builder import create_property_sales_agent_graph
+from fastapi import Request
 
 
 ##> Initialize router
@@ -83,9 +84,11 @@ async def get_all_conversations(
     description="Get chat history for a specific conversation ID."
 )
 async def get_conversation_history(
-    conversation_id: str,
-    token_data: dict = Depends(verify_bearer_token),
-    db: DatabaseConnection = Depends(get_db)
+     conversation_id: str,
+     request: Request,
+     token_data: dict = Depends(verify_bearer_token),
+     db: DatabaseConnection = Depends(get_db),
+    
 ) -> ConversationHistoryResponse:
      """
      Retrieve chat history for a specific conversation.
@@ -122,7 +125,7 @@ async def get_conversation_history(
           print(f"Conversation found in history table. Conversation ID: {conversation_id}")
           
           # Get messages from PostgreSQL checkpoint database
-          graph = await create_property_sales_agent_graph()
+          graph = await create_property_sales_agent_graph(request)
           config = {"configurable": {"thread_id": conversation_id}}
           
           try:

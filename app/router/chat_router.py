@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.models.api_models import ChatRequest, ChatResponse
 from app.utils.helpers import get_or_create_conversation
 from app.chatagent.builder import invoke_agent
+from fastapi import Request
 from typing import Dict, Any, Tuple
 
 
@@ -28,6 +29,7 @@ chat_router = APIRouter(prefix="/agents", tags=["Chat"])
 )
 async def chat_with_agent(
     chat_request: ChatRequest,
+    request: Request,
     context_data: Tuple[Dict[str, Any], bool] = Depends(get_or_create_conversation)
 ) -> ChatResponse:
     """
@@ -56,7 +58,8 @@ async def chat_with_agent(
         result = await invoke_agent(
             message        =chat_request.message,
             conversation_id=conversation['conversation_id'],
-            is_new_conversation=new_conversation
+            is_new_conversation=new_conversation,
+            request=request
         )
         
         # Build response
