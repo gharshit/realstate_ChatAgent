@@ -22,6 +22,10 @@ Proplens is a property management API with an intelligent conversational agent t
 
 ![Architecture](https://github.com/gharshit/realstate_ChatAgent/blob/main/summary.png)
 
+## Alternative deterministic method for architecture to achieve same goal (not implemented yet)
+
+![AlternateArchitecture](https://github.com/gharshit/realstate_ChatAgent/blob/main/alternate_semi_autonomous_graph.png)
+
 ## Modules
 
 ### app/
@@ -283,5 +287,6 @@ proplens/
 
 - Solve minor bugs. Ex: to have llm use correct lead_id.
 - Implement Logging for better error handling and debugging.
+
 
 
