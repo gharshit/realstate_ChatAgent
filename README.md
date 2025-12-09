@@ -29,6 +29,15 @@ Proplens is a property management API with an intelligent conversational agent t
 
 ![AlternateArchitecture](https://github.com/gharshit/realstate_ChatAgent/blob/main/alternate_semi_autonomous_graph.png)
 
+
+### To enable full tracing, debugging, and evaluation for this LangGraph application, configure LangSmith:
+```
+export LANGSMITH_API_KEY="your_key_here"
+export LANGCHAIN_TRACING_V2="true"
+export LANGSMITH_PROJECT="my-langgraph-app"
+```
+
+
 ## Modules
 
 ### app/
@@ -290,6 +299,7 @@ proplens/
 
 - Solve minor bugs. Ex: to have llm use correct lead_id.
 - Implement Logging for better error handling and debugging.
+
 
 
 
